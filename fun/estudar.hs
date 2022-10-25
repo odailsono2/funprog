@@ -38,8 +38,7 @@ qsort (x:xs) = qsort smaller ++ [x] ++ qsort larger
 
 revsort :: Ord a => [a]->[a]
 revsort []     = []
-revsort (x:xs) = revsort larger ++ [x] ++ revsort smaller
-    where
+revsort (x:xs) = revsort larger ++ [x] ++ revsort smaller where
         smaller = [a |a <- xs, a<= x]
         larger  = [b |b <- xs, b> x]
 
@@ -143,7 +142,20 @@ lengths xs = sum [1 | _ <-xs]
 isLower :: Char -> Bool
 isLower c = or [ c == c' | c' <- ['a'..'z']]
 
-    {--
+n = a `div` length xs
+    where
+        a  = 10
+        xs = [1,2,3,4,5]
+
+sumsqre :: (Num a, Enum a) => [a] -> a
+sumsqre xs = sum [x^2 | x<-xs]
+
+replicar ::  Int -> a -> [a]
+replicar c y = [y | _ <-[1..c] ]
+
+perfeito :: Int -> [Int]
+perfeito a = [ x | x <- [1..a] , x == (sum (factors x)-x) ]
+       {--
 let2int :: Char -> Int
 let2int c = Ord c - Ord 'a'
 
