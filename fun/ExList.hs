@@ -8,8 +8,11 @@ import Prelude
     , flip , curry , uncurry
     , otherwise , error , undefined
     )
+
 import qualified Prelude   as P
+
 import qualified Data.List as L
+
 import qualified Data.Char as C
 
 -- to use a function from a qualified import
@@ -19,31 +22,44 @@ import qualified Data.Char as C
 -- I import these for you to test the original functions on ghci:
 -- ghci> :t C.toUpper
 -- C.toUpper :: Char -> Char
+
 -- You MUST NOT use ANY of these in your code
+--data L a = E | C a (L a)
+--           deriving (P.Show, Eq)
 
 head :: [a] -> a
-head = undefined
+head []     = error "Lista Vazia"
+head (x:xs) = x
 
 tail :: [a] -> [a]
-tail = undefined
+tail []     = error "Lista Vazia"
+tail (x:xs) = xs
 
-null :: [a] -> Bool
-null = undefined
+null :: (Eq a) => [a] -> Bool
+null xs
+  | xs == []  = True
+  | otherwise = False
 
 length :: Integral i => [a] -> i
-length = undefined
+length [] = 0
+length (x:xs) = 1 + length xs
 
 sum :: Num a => [a] -> a
-sum = undefined
+sum []     = 0
+sum (x:xs) = x + sum xs
 
 product :: Num a => [a] -> a
-product = undefined
+product []     = 1
+product (x:xs) = x * product xs
 
 reverse :: [a] -> [a]
-reverse = undefined
+reverse [] = []
+reverse (x:xs) = reverse xs ++ [x]
 
 (++) :: [a] -> [a] -> [a]
-(++) = undefined
+xs ++ [] = xs
+[] ++ ys = ys
+(x:xs) ++ ys = x:(xs ++ ys)
 
 -- right-associative for performance!
 -- (what?!)
@@ -51,7 +67,7 @@ infixr 5 ++
 
 -- (snoc is cons written backwards)
 snoc :: a -> [a] -> [a]
-snoc = undefined
+snoc x ys = ys ++ [x]
 
 (<:) :: [a] -> a -> [a]
 (<:) = flip snoc
@@ -66,23 +82,75 @@ xs +++ (y:ys) = (xs +++ [y]) +++ ys
 -- (hmm?)
 infixl 5 +++
 
--- minimum :: Ord a => [a] -> a
--- maximum :: Ord a => [a] -> a
+minimum :: Ord a => [a] -> a
+minimum []  = error "Lista Vazia"
+minimum [x] = x
+minimum (x:y:xs)
+  | x < y = minimum (x:xs)
+  | otherwise = minimum (y:xs)
 
--- take
--- drop
+maximum :: Ord a => [a] -> a
+maximum []  = error "Lista Vazia"
+maximum [x] = x
+maximum (x:y:xs)
+  | x > y     = maximum (x:xs)
+  | otherwise = maximum (y:xs)
 
--- takeWhile
+take :: (Eq a, Num a)=>a->[b]->[b]
+take _ []     = []
+take n (y:ys)
+  | n == 0    = []
+  | otherwise = y : take (n-1) ys
+
+drop :: (Eq a, Num a)=> a->[b]->[b]
+drop _ []        = []
+drop n (y:ys)
+  | n == 0       =  y:ys
+  | otherwise    =  drop (n-1) ys
+
+takeWhile :: (a->Bool)->[a]->[a]
+takeWhile f (y:ys)
+   | f y == True    = y : takeWhile f ys
+   | otherwise      = []
 -- dropWhile
 
--- tails
--- init
--- inits
+tails:: [a]->[[a]]
+tails []     = [] : []
+tails (x:xs) = (x : xs) : (tails xs)
 
--- subsequences
+inits :: [a]->[[a]]
+inits []      = []
+inits xs  =  reverse (tails xs)
 
--- any
--- all
+--[1,2,3]
+--[[],[2],[3],[2,3],[4],[2,4],[3,4],[2,3,4]]
+--subsequences :: [a]->[[a]]
+--subsequences [] = []
+--subsequences all@(x:xs) = : subsequences xs
+--    where
+--        aux :: [a] -> [a]
+--        aux [] = []
+--        aux [ys] = [ys]
+
+foldr::(a->b->b)->b->[a]->b
+foldr f v []     = v
+foldr f v (x:xs) = x `f` foldr f v xs
+
+
+
+any:: (a->Bool) -> [a] -> Bool
+--any _ []     = False
+any p (x:xs) = foldr f b xs
+    where
+        b = False
+        f = \ x w -> p x || w
+
+
+--[1,2,3]
+--(>3)
+--1:2:3:[]
+--1 > 3 ( 2 > 3 (b > 3)
+
 
 -- and
 -- or
@@ -96,19 +164,50 @@ infixl 5 +++
 
 -- (!!)
 
--- filter
--- map
+filter :: (a->Bool) -> [a] -> [a]
+filter _ []   = []
+filter p (x:xs)
+    | p x       =  x:filter p xs
+    | otherwise =  filter p xs
+
+map :: (a->b)->[a]->[b]
+map f (x:xs) = foldr g b xs
+    where
+        b = []
+        g = \ x w -> f x : w
+
+{--
+map _ []     = []
+map f (x:xs) = f x : map f xs
+--}
 
 -- cycle
--- repeat
--- replicate
+repeat :: a->[a]
+repeat x = x:repeat x
 
+--foldr::(a->b->b)->b->[a]->b
+replicate:: Int->a->[a]
+replicate n x = foldr f b [x | k <- [1..n]]
+        where
+            b = []
+            f = \ x w -> x : w
+{--
+replicate 0 _ = []
+replicate n x = x:replicate (n-1) x
+--}
 -- isPrefixOf
 -- isInfixOf
 -- isSuffixOf
 
--- zip
--- zipWith
+zip :: [a]->[b]->[(a,b)]
+zip _ []          = []
+zip [] _          = []
+zip (x:xs) (y:ys) = (x,y):zip xs ys
+
+zipWith :: (a->b->c)->[a]->[b]->[c]
+zipWith _ [] _ = []
+zipWith _ _ [] = []
+zipWith f (x:xs) (y:ys) = f x y : zipWith f xs ys
 
 -- intercalate
 -- nub
