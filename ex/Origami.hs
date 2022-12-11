@@ -63,8 +63,8 @@ scanr :: (a -> b -> b) -> b -> [a] -> [b]
 scanr f v xs= foldr g b xs
     where
         b = [v]
-        --g::(a->)a->[b]->[b]
-        g = (\ x (w:ws) -> (x `f` w):w:ws)
+        --g::a->[b]->[b]
+        g = (\ x wts@(w:ws) -> (x `f` w):wts)
 
 --
 -- Define all of the following functions as folds:
